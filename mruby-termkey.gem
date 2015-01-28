@@ -1,0 +1,6 @@
+name: mruby-libtermkey
+description: TermKey class
+author: mruby-libtermkey developers
+website: https://github.com/masahino/mruby-libtermkey
+protocol: git
+repository: https://github.com/masahino/mruby-libtermkey.git
