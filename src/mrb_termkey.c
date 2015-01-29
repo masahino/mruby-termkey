@@ -73,10 +73,31 @@ static mrb_value mrb_termkeykey_modifiers(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(tk->modifiers);
 }
 
-static mrb_value mrb_termkeykey_codepoint(mrb_state *mrb, mrb_value self)
+static mrb_value mrb_termkeykey_code(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = DATA_PTR(self);
-     return mrb_fixnum_value(tk->code.codepoint);
+     mrb_value code;
+
+     switch(tk->type) {
+     case TERMKEY_TYPE_UNICODE:
+	  code = mrb_fixnum_value(tk->code.codepoint);
+	  break;
+     case TERMKEY_TYPE_FUNCTION:
+	  code = mrb_fixnum_value(tk->code.number);
+	  break;
+     case TERMKEY_TYPE_KEYSYM:
+	  code = mrb_fixnum_value(tk->code.sym);
+	  break;
+     case  TERMKEY_TYPE_MOUSE:
+	  code = mrb_str_new(mrb, tk->code.mouse, 4);
+	  break;
+     case TERMKEY_TYPE_POSITION:
+     case TERMKEY_TYPE_MODEREPORT:
+     case TERMKEY_TYPE_UNKNOWN_CSI:
+     default:
+	  code = mrb_nil_value();
+     }
+     return code;
 }
 
 void mrb_mruby_termkey_gem_init(mrb_state *mrb)
@@ -92,7 +113,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkeykey, "codepoint", mrb_termkeykey_codepoint, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkeykey, "code", mrb_termkeykey_code, MRB_ARGS_NONE());
 
     mrb_define_const(mrb, termkey, "TYPE_UNICODE", mrb_fixnum_value(TERMKEY_TYPE_UNICODE));
     mrb_define_const(mrb, termkey, "TYPE_FUNCTION", mrb_fixnum_value(TERMKEY_TYPE_FUNCTION));
