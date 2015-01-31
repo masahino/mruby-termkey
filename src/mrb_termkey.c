@@ -53,7 +53,6 @@ static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 
      key = mrb_malloc(mrb, sizeof(TermKeyKey));
      ret = termkey_waitkey(tk, key);
-     printf("ret = %d\n", ret);
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
      DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
      DATA_PTR(key_obj) = key;
@@ -131,6 +130,32 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_const(mrb, termkey, "KEYMOD_SHIFT", mrb_fixnum_value(TERMKEY_KEYMOD_SHIFT));
     mrb_define_const(mrb, termkey, "KEYMOD_ALT", mrb_fixnum_value(TERMKEY_KEYMOD_ALT));
     mrb_define_const(mrb, termkey, "KEYMOD_CTRL", mrb_fixnum_value(TERMKEY_KEYMOD_CTRL));
+
+    /* TermKeySym */
+    mrb_define_const(mrb, termkey, "SYM_UNKNOWN", mrb_fixnum_value(TERMKEY_SYM_UNKNOWN));
+    mrb_define_const(mrb, termkey, "SYM_NONE", mrb_fixnum_value(TERMKEY_SYM_NONE));
+    /* Special names in C0 */
+    mrb_define_const(mrb, termkey, "SYM_BACKSPACE", mrb_fixnum_value(TERMKEY_SYM_BACKSPACE));
+    mrb_define_const(mrb, termkey, "SYM_TAB", mrb_fixnum_value(TERMKEY_SYM_TAB));
+    mrb_define_const(mrb, termkey, "SYM_ENTER", mrb_fixnum_value(TERMKEY_SYM_ENTER));
+    mrb_define_const(mrb, termkey, "SYM_ESCAPE", mrb_fixnum_value(TERMKEY_SYM_ESCAPE));
+    /* Special names in G0 */
+    mrb_define_const(mrb, termkey, "SYM_SPACE", mrb_fixnum_value(TERMKEY_SYM_SPACE));
+    mrb_define_const(mrb, termkey, "SYM_DEL", mrb_fixnum_value(TERMKEY_SYM_DEL));
+    /* Special keys */
+    mrb_define_const(mrb, termkey, "SYM_UP", mrb_fixnum_value(TERMKEY_SYM_UP));
+    mrb_define_const(mrb, termkey, "SYM_DOWN", mrb_fixnum_value(TERMKEY_SYM_DOWN));
+    mrb_define_const(mrb, termkey, "SYM_LEFT", mrb_fixnum_value(TERMKEY_SYM_LEFT));
+    mrb_define_const(mrb, termkey, "SYM_RIGHT", mrb_fixnum_value(TERMKEY_SYM_RIGHT));
+    mrb_define_const(mrb, termkey, "SYM_BEGIN", mrb_fixnum_value(TERMKEY_SYM_BEGIN));
+    mrb_define_const(mrb, termkey, "SYM_FIND", mrb_fixnum_value(TERMKEY_SYM_FIND));
+    mrb_define_const(mrb, termkey, "SYM_INSERT", mrb_fixnum_value(TERMKEY_SYM_INSERT));
+    mrb_define_const(mrb, termkey, "SYM_DELETE", mrb_fixnum_value(TERMKEY_SYM_DELETE));
+    mrb_define_const(mrb, termkey, "SYM_SELECT", mrb_fixnum_value(TERMKEY_SYM_SELECT));
+    mrb_define_const(mrb, termkey, "SYM_PAGEUP", mrb_fixnum_value(TERMKEY_SYM_PAGEUP));
+    mrb_define_const(mrb, termkey, "SYM_PAGEDOWN", mrb_fixnum_value(TERMKEY_SYM_PAGEDOWN));
+    mrb_define_const(mrb, termkey, "SYM_HOME", mrb_fixnum_value(TERMKEY_SYM_HOME));
+    mrb_define_const(mrb, termkey, "SYM_END", mrb_fixnum_value(TERMKEY_SYM_END));
     DONE;
 }
 
