@@ -99,6 +99,12 @@ static mrb_value mrb_termkeykey_code(mrb_state *mrb, mrb_value self)
      return code;
 }
 
+static mrb_value mrb_termkeykey_utf8(mrb_state *mrb, mrb_value self)
+{
+     TermKeyKey *tk = DATA_PTR(self);
+     return mrb_str_new_cstr(mrb, tk->utf8);
+}
+
 void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 {
      struct RClass *termkey, *termkeykey;
@@ -113,6 +119,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "code", mrb_termkeykey_code, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkeykey, "utf8", mrb_termkeykey_utf8, MRB_ARGS_NONE());
 
     mrb_define_const(mrb, termkey, "TYPE_UNICODE", mrb_fixnum_value(TERMKEY_TYPE_UNICODE));
     mrb_define_const(mrb, termkey, "TYPE_FUNCTION", mrb_fixnum_value(TERMKEY_TYPE_FUNCTION));
