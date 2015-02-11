@@ -23,4 +23,5 @@ end
 if key.modifiers & TermKey::KEYMOD_CTRL > 0
 	puts "ctrl"
 end
+puts tk.strfkey(key, TermKey::FORMAT_VIM);
 

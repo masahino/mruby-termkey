@@ -60,6 +60,20 @@ static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
      return ret_ary;
 }
 
+static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+     TermKeyKey *key;
+     char buff[64];
+     mrb_int format, ret;
+     mrb_value key_obj;
+
+     mrb_get_args(mrb, "oi", &key_obj, &format);
+     key = DATA_PTR(key_obj);
+     ret = termkey_strfkey(tk, buff, sizeof(buff), key, format);
+     return mrb_str_new_cstr(mrb, buff);
+}
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = DATA_PTR(self);
@@ -105,6 +119,7 @@ static mrb_value mrb_termkeykey_utf8(mrb_state *mrb, mrb_value self)
      return mrb_str_new_cstr(mrb, tk->utf8);
 }
 
+
 void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 {
      struct RClass *termkey, *termkeykey;
@@ -115,6 +130,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
      
     mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
@@ -163,6 +179,18 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_const(mrb, termkey, "SYM_PAGEDOWN", mrb_fixnum_value(TERMKEY_SYM_PAGEDOWN));
     mrb_define_const(mrb, termkey, "SYM_HOME", mrb_fixnum_value(TERMKEY_SYM_HOME));
     mrb_define_const(mrb, termkey, "SYM_END", mrb_fixnum_value(TERMKEY_SYM_END));
+
+    mrb_define_const(mrb, termkey, "FORMAT_LONGMOD", mrb_fixnum_value(TERMKEY_FORMAT_LONGMOD));
+    mrb_define_const(mrb, termkey, "FORMAT_CARETCTRL",  mrb_fixnum_value(TERMKEY_FORMAT_CARETCTRL));
+    mrb_define_const(mrb, termkey, "FORMAT_ALTISMETA",  mrb_fixnum_value(TERMKEY_FORMAT_ALTISMETA));
+    mrb_define_const(mrb, termkey, "FORMAT_WRAPBRACKET",  mrb_fixnum_value(TERMKEY_FORMAT_WRAPBRACKET));
+    mrb_define_const(mrb, termkey, "FORMAT_SPACEMOD",  mrb_fixnum_value(TERMKEY_FORMAT_SPACEMOD));
+    mrb_define_const(mrb, termkey, "FORMAT_LOWERMOD",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERMOD));
+    mrb_define_const(mrb, termkey, "FORMAT_LOWERSPACE",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERSPACE));
+    mrb_define_const(mrb, termkey, "FORMAT_MOUSE_POS",  mrb_fixnum_value(TERMKEY_FORMAT_MOUSE_POS));
+    mrb_define_const(mrb, termkey, "FORMAT_VIM",  mrb_fixnum_value(TERMKEY_FORMAT_VIM));
+    mrb_define_const(mrb, termkey, "FORMAT_URWID",  mrb_fixnum_value(TERMKEY_FORMAT_URWID));
+
     DONE;
 }
 
