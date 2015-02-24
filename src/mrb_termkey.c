@@ -32,11 +32,22 @@ static const struct mrb_data_type mrb_termkeykey_data_type = {
 
 static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
 {
-  TermKey *tk = termkey_new(0, 0);
+  TermKey *tk = NULL;
   char *str;
-  int len;
+  mrb_int argc, fd, flags;
 
   DATA_TYPE(self) = &mrb_termkey_data_type;
+  DATA_PTR(self) = NULL;
+
+  argc = mrb_get_args(mrb, "|ii", &fd, &flags);
+  if (argc == 0) {
+    fd = 0;
+  }
+  if (argc < 2) {
+    flags = 0;
+  }
+  fprintf(stderr, "flags = %d\n", flags);
+  tk = termkey_new(fd, flags);
   DATA_PTR(self) = tk;
 
   return self;
@@ -128,7 +139,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
      termkeykey = mrb_define_class_under(mrb, termkey, "Key", mrb->object_class);
      MRB_SET_INSTANCE_TT(termkeykey, MRB_TT_DATA);
      
-    mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
 
@@ -190,6 +201,15 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_const(mrb, termkey, "FORMAT_MOUSE_POS",  mrb_fixnum_value(TERMKEY_FORMAT_MOUSE_POS));
     mrb_define_const(mrb, termkey, "FORMAT_VIM",  mrb_fixnum_value(TERMKEY_FORMAT_VIM));
     mrb_define_const(mrb, termkey, "FORMAT_URWID",  mrb_fixnum_value(TERMKEY_FORMAT_URWID));
+
+    mrb_define_const(mrb, termkey, "FLAG_NOINTERPRET", mrb_fixnum_value(TERMKEY_FLAG_NOINTERPRET));
+    mrb_define_const(mrb, termkey, "FLAG_CONVERTKP", mrb_fixnum_value(TERMKEY_FLAG_CONVERTKP));
+    mrb_define_const(mrb, termkey, "FLAG_RAW", mrb_fixnum_value(TERMKEY_FLAG_RAW));
+    mrb_define_const(mrb, termkey, "FLAG_UTF8", mrb_fixnum_value(TERMKEY_FLAG_UTF8));
+    mrb_define_const(mrb, termkey, "FLAG_NOTERMIOS", mrb_fixnum_value(TERMKEY_FLAG_NOTERMIOS));
+    mrb_define_const(mrb, termkey, "FLAG_SPACESYMBOL", mrb_fixnum_value(TERMKEY_FLAG_SPACESYMBOL));
+    mrb_define_const(mrb, termkey, "FLAG_CTRLC", mrb_fixnum_value(TERMKEY_FLAG_CTRLC));
+    mrb_define_const(mrb, termkey, "FLAG_EINTR", mrb_fixnum_value(TERMKEY_FLAG_EINTR));
 
     DONE;
 }
