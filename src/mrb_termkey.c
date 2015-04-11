@@ -46,7 +46,6 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
   if (argc < 2) {
     flags = 0;
   }
-  fprintf(stderr, "flags = %d\n", flags);
   tk = termkey_new(fd, flags);
   DATA_PTR(self) = tk;
 
