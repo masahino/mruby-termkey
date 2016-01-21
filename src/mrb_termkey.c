@@ -84,6 +84,25 @@ static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
      return mrb_str_new_cstr(mrb, buff);
 }
 
+static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+     TermKeyKey *key;
+     TermKeyMouseEvent ev;
+     int button, line, col;
+     mrb_value key_obj;
+     mrb_value ret_ary = mrb_ary_new(mrb);
+
+     mrb_get_args(mrb, "o", &key_obj);
+     key = DATA_PTR(key_obj);
+     termkey_interpret_mouse(tk, key, &ev, &button, &line, &col);
+     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ev));
+     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(button));
+     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(line));
+     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(col));
+     return ret_ary;
+}
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = DATA_PTR(self);
@@ -141,6 +160,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
+    mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
@@ -210,7 +230,10 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_const(mrb, termkey, "FLAG_CTRLC", mrb_fixnum_value(TERMKEY_FLAG_CTRLC));
     mrb_define_const(mrb, termkey, "FLAG_EINTR", mrb_fixnum_value(TERMKEY_FLAG_EINTR));
 
-    DONE;
+    mrb_define_const(mrb, termkey, "MOUSE_UNKNOWN", mrb_fixnum_value(TERMKEY_MOUSE_UNKNOWN));
+    mrb_define_const(mrb, termkey, "MOUSE_PRESS", mrb_fixnum_value(TERMKEY_MOUSE_PRESS));
+    mrb_define_const(mrb, termkey, "MOUSE_DRAG", mrb_fixnum_value(TERMKEY_MOUSE_DRAG));
+    mrb_define_const(mrb, termkey, "MOUSE_RELEASE", mrb_fixnum_value(TERMKEY_MOUSE_RELEASE));
 }
 
 void mrb_mruby_termkey_gem_final(mrb_state *mrb)
