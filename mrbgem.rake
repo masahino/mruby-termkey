@@ -17,12 +17,14 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "w") do |f|
           f.write libtermkey_tar
         end
-      sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make)}
+        sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make)}
+      end
     end
 
-    self.linker.library_paths << File.dirname(libtermkey_a)
+    self.linker.flags_before_libraries << libtermkey_a
+    self.linker.libraries.delete 'termkey'
     [self.cc, self.cxx, self.objc, self.mruby.cc, self.mruby.cxx, self.mruby.objc].each do |cc|
       cc.include_paths << libtermkey_dir
     end
-  end end
+  end
 end
