@@ -33,7 +33,6 @@ static const struct mrb_data_type mrb_termkeykey_data_type = {
 static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
 {
   TermKey *tk = NULL;
-  char *str;
   mrb_int argc, fd, flags;
 
   DATA_TYPE(self) = &mrb_termkey_data_type;
