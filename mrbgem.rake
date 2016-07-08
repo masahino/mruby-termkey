@@ -6,9 +6,9 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
   def spec.download_libtermkey
     require 'open-uri'
     libtermkey_url = "http://www.leonerd.org.uk/code/libtermkey/libtermkey-0.17.tar.gz"
-    libtermkey_build_root = "build/libtermkey/#{build.name}"
+    libtermkey_build_root = "#{build_dir}/libtermkey/"
     libtermkey_dir = "#{libtermkey_build_root}/libtermkey-0.17"
-    libtermkey_a = "#{libtermkey_dir}/.libs/libtermkey.a"
+    libtermkey_a = "#{libtermkey_dir}/libtermkey.a"
 
     unless File.exists?(libtermkey_a)
       open(libtermkey_url, "r") do |http|
@@ -17,7 +17,17 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "w") do |f|
           f.write libtermkey_tar
         end
-        sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make)}
+        if build.kind_of?(MRuby::CrossBuild)
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make termkey.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make driver-csi.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make driver-ti.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
+
+        else
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make)}
+          sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
+        end
       end
     end
 
