@@ -1,0 +1,93 @@
+diff -uprN libtermkey-0.18-org/Makefile libtermkey-0.18/Makefile
+--- libtermkey-0.18-org/Makefile	2015-10-07 06:52:28.000000000 +0900
++++ libtermkey-0.18/Makefile	2016-07-12 23:00:00.000000000 +0900
+@@ -10,7 +10,7 @@ ifneq ($(VERBOSE),1)
+   LIBTOOL +=--quiet
+ endif
+ 
+-override CFLAGS +=-Wall -std=c99
++override CFLAGS +=-Wall -std=c99 -I/usr/i686-w64-mingw32/include/ncurses
+ 
+ ifeq ($(DEBUG),1)
+   override CFLAGS +=-ggdb -DDEBUG
+diff -uprN libtermkey-0.18-org/termkey-internal.h libtermkey-0.18/termkey-internal.h
+--- libtermkey-0.18-org/termkey-internal.h	2015-10-07 06:52:28.000000000 +0900
++++ libtermkey-0.18/termkey-internal.h	2016-07-12 22:05:56.000000000 +0900
+@@ -4,7 +4,9 @@
+ #include "termkey.h"
+ 
+ #include <stdint.h>
++#ifndef _WIN32
+ #include <termios.h>
++#endif /* _WIN32 */
+ 
+ struct TermKeyDriver
+ {
+@@ -41,7 +43,9 @@ struct TermKey {
+   size_t hightide; /* Position beyond buffstart at which peekkey() should next start
+                     * normally 0, but see also termkey_interpret_csi */
+ 
++#ifndef _WIN32
+   struct termios restore_termios;
++#endif /* _WIN32 */
+   char restore_termios_valid;
+ 
+   int waittime; // msec
+diff -uprN libtermkey-0.18-org/termkey.c libtermkey-0.18/termkey.c
+--- libtermkey-0.18-org/termkey.c	2015-10-07 06:52:28.000000000 +0900
++++ libtermkey-0.18/termkey.c	2016-07-12 22:56:29.000000000 +0900
+@@ -3,7 +3,9 @@
+ 
+ #include <ctype.h>
+ #include <errno.h>
++#ifndef _WIN32
+ #include <poll.h>
++#endif /* _WIN32 */
+ #include <unistd.h>
+ #include <string.h>
+ #include <strings.h>
+@@ -463,6 +465,7 @@ int termkey_start(TermKey *tk)
+   if(tk->is_started)
+     return 1;
+ 
++#ifndef _WIN32
+   if(tk->fd != -1 && !(tk->flags & TERMKEY_FLAG_NOTERMIOS)) {
+     struct termios termios;
+     if(tcgetattr(tk->fd, &termios) == 0) {
+@@ -497,6 +500,7 @@ int termkey_start(TermKey *tk)
+       tcsetattr(tk->fd, TCSANOW, &termios);
+     }
+   }
++#endif /* _WIN32 */
+ 
+   struct TermKeyDriverNode *p;
+   for(p = tk->drivers; p; p = p->next)
+@@ -522,8 +526,10 @@ int termkey_stop(TermKey *tk)
+     if(p->driver->stop_driver)
+       (*p->driver->stop_driver)(tk, p->info);
+ 
++#ifndef _WIN32
+   if(tk->restore_termios_valid)
+     tcsetattr(tk->fd, TCSANOW, &tk->restore_termios);
++#endif /* _WIN32 */
+ 
+   tk->is_started = 0;
+ 
+@@ -1049,6 +1055,7 @@ TermKeyResult termkey_waitkey(TermKey *t
+             // what we have
+             return termkey_getkey_force(tk, key);
+ 
++#ifndef _WIN32
+           struct pollfd fd;
+ 
+ retry:
+@@ -1072,6 +1079,9 @@ retry:
+             return ret;
+           if(ret == TERMKEY_RES_NONE)
+             return termkey_getkey_force(tk, key);
++#else
++        return TERMKEY_RES_NONE;
++#endif /* _WIN32 */
+         }
+         break;
+     }
