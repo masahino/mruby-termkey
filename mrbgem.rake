@@ -34,7 +34,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
 
         else
-          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make)}
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make libtermkey.la)}
           sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
         end
       end
