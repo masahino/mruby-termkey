@@ -102,6 +102,26 @@ static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
      return ret_ary;
 }
 
+static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+
+     termkey_stop(tk);
+     return mrb_true_value();
+}
+
+#if _WIN32
+static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+     mrb_int fd;
+
+     mrb_get_args(mrb, "i", &fd);
+     ret = termkey_set_fd(tk, fd);
+     return mrb_true_value();
+}
+#endif
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = DATA_PTR(self);
@@ -160,6 +180,10 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
     mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
+    mrb_define_method(mrb, termkey, "stop", mrb_termkey_stop, MRB_ARGS_NONE());
+#if _WIN32
+    mrb_define_method(mrb, termkey, "set_fd", mrb_termkey_stop, MRB_ARGS_REQ(1));
+#endif
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
