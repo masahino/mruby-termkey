@@ -114,7 +114,7 @@ static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = DATA_PTR(self);
-     mrb_int fd;
+     mrb_int fd, ret;
 
      mrb_get_args(mrb, "i", &fd);
      ret = termkey_set_fd(tk, fd);
