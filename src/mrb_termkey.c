@@ -151,6 +151,27 @@ static mrb_value mrb_termkey_get_buffer_remaining(mrb_state *mrb, mrb_value self
      return mrb_fixnum_value(ret);
 }
 
+static mrb_value mrb_termkey_get_waittime(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+     size_t ret;
+
+     ret = termkey_get_waittime(tk);
+     return mrb_fixnum_value(ret);
+}
+
+static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = DATA_PTR(self);
+     mrb_int waittime;
+
+     mrb_get_args(mrb, "i", &waittime);
+
+     termkey_set_waittime(tk, waittime);
+     return mrb_nil_value();
+}
+
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = DATA_PTR(self);
@@ -213,9 +234,12 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 #if _WIN32
     mrb_define_method(mrb, termkey, "set_fd", mrb_termkey_set_fd, MRB_ARGS_REQ(1));
 #endif
-    mrb_define_method(mrb, termkey, "get_buffer_size", mrb_termkey_get_buffer_size, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "set_buffer_size", mrb_termkey_set_buffer_size, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "get_buffer_remaining", mrb_termkey_get_buffer_remaining, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "buffer_size", mrb_termkey_get_buffer_size, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "buffer_size=", mrb_termkey_set_buffer_size, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, termkey, "buffer_remaining", mrb_termkey_get_buffer_remaining, MRB_ARGS_NONE());
+  
+    mrb_define_method(mrb, termkey, "waittime=", mrb_termkey_set_waittime, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, termkey, "waittime", mrb_termkey_get_waittime, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
