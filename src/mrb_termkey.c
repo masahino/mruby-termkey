@@ -18,7 +18,7 @@
 
 static void mrb_termkey_free(mrb_state *mrb, void *ptr) {
      if (ptr != NULL) {
-	  termkey_destroy(ptr);
+	  termkey_destroy((TermKey *)ptr);
      }
 }
 
@@ -53,14 +53,14 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      TermKeyResult ret;
      TermKeyKey *key;
      struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
      mrb_value ret_ary = mrb_ary_new(mrb);
      mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
 
-     key = mrb_malloc(mrb, sizeof(TermKeyKey));
+     key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
      ret = termkey_waitkey(tk, key);
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
      DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
@@ -71,21 +71,21 @@ static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      TermKeyKey *key;
      char buff[64];
      mrb_int format, ret;
      mrb_value key_obj;
 
      mrb_get_args(mrb, "oi", &key_obj, &format);
-     key = DATA_PTR(key_obj);
-     ret = termkey_strfkey(tk, buff, sizeof(buff), key, format);
+     key = (TermKeyKey *)DATA_PTR(key_obj);
+     ret = termkey_strfkey(tk, buff, sizeof(buff), key, (TermKeyFormat)format);
      return mrb_str_new_cstr(mrb, buff);
 }
 
 static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      TermKeyKey *key;
      TermKeyMouseEvent ev;
      int button, line, col;
@@ -93,7 +93,7 @@ static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
      mrb_value ret_ary = mrb_ary_new(mrb);
 
      mrb_get_args(mrb, "o", &key_obj);
-     key = DATA_PTR(key_obj);
+     key = (TermKeyKey *)DATA_PTR(key_obj);
      termkey_interpret_mouse(tk, key, &ev, &button, &line, &col);
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ev));
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(button));
@@ -104,7 +104,7 @@ static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
 
      termkey_stop(tk);
      return mrb_true_value();
@@ -113,7 +113,7 @@ static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 #if _WIN32
 static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      mrb_int fd;
 
      mrb_get_args(mrb, "i", &fd);
@@ -124,7 +124,7 @@ static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_get_buffer_size(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      size_t ret;
 
      ret = termkey_get_buffer_size(tk);
@@ -133,7 +133,7 @@ static mrb_value mrb_termkey_get_buffer_size(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_set_buffer_size(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      mrb_int size, ret;
 
      mrb_get_args(mrb, "i", &size);
@@ -144,7 +144,7 @@ static mrb_value mrb_termkey_set_buffer_size(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_get_buffer_remaining(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      size_t ret;
 
      ret = termkey_get_buffer_remaining(tk);
@@ -153,7 +153,7 @@ static mrb_value mrb_termkey_get_buffer_remaining(mrb_state *mrb, mrb_value self
 
 static mrb_value mrb_termkey_get_waittime(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      size_t ret;
 
      ret = termkey_get_waittime(tk);
@@ -162,7 +162,7 @@ static mrb_value mrb_termkey_get_waittime(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = DATA_PTR(self);
+     TermKey *tk = (TermKey *)DATA_PTR(self);
      mrb_int waittime;
 
      mrb_get_args(mrb, "i", &waittime);
@@ -174,19 +174,19 @@ static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = DATA_PTR(self);
+     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
      return mrb_fixnum_value(tk->type);
 }
 
 static mrb_value mrb_termkeykey_modifiers(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = DATA_PTR(self);
+     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
      return mrb_fixnum_value(tk->modifiers);
 }
 
 static mrb_value mrb_termkeykey_code(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = DATA_PTR(self);
+     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
      mrb_value code;
 
      switch(tk->type) {
@@ -213,7 +213,7 @@ static mrb_value mrb_termkeykey_code(mrb_state *mrb, mrb_value self)
 
 static mrb_value mrb_termkeykey_utf8(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = DATA_PTR(self);
+     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
      return mrb_str_new_cstr(mrb, tk->utf8);
 }
 

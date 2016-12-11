@@ -22,19 +22,19 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
 #            sh %Q{cd #{libtermkey_build_root} && patch -p0 < #{dir}/libtermkey-0.18.patch}
             sh %Q{cd #{libtermkey_dir} && wget http://foicica.com/hg/textadept/raw-file/ecbc553cbbc7/src/termkey.patch && patch < termkey.patch}
           end
-          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make termkey.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make termkey.o)}
           if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make driver-win32-pdcurses.o)}
+            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-win32-pdcurses.o)}
             sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-win32-pdcurses.o)}
           else
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make driver-csi.o)}
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}"  make driver-ti.o)}
+            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-csi.o)}
+            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-ti.o)}
             sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
           end
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
 
         else
-          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="#{build.cc.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make libtermkey.la)}
+          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make libtermkey.la)}
           sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
         end
       end
