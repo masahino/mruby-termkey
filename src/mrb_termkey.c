@@ -171,6 +171,13 @@ static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
      return mrb_nil_value();
 }
 
+static mrb_value mrb_termkey_destroy(mrb_state *mrb, mrb_value self)
+{
+    TermKey *tk = (TermKey *)DATA_PTR(self);
+    termkey_destroy(tk);
+    DATA_PTR(self) = NULL;
+    return self;
+}
 
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
@@ -240,6 +247,8 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
   
     mrb_define_method(mrb, termkey, "waittime=", mrb_termkey_set_waittime, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, termkey, "waittime", mrb_termkey_get_waittime, MRB_ARGS_NONE());
+
+    mrb_define_method(mrb, termkey, "destroy", mrb_termkey_destroy, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
