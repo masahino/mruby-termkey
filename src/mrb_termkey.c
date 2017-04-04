@@ -45,7 +45,11 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
   if (argc < 2) {
     flags = 0;
   }
+#if !_WIN32
   tk = termkey_new(fd, flags);
+#else
+  tk = termkey_new((void *)fd, flags);
+#endif
   DATA_PTR(self) = tk;
 
   return self;
@@ -117,7 +121,7 @@ static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
      mrb_int fd;
 
      mrb_get_args(mrb, "i", &fd);
-     termkey_set_fd(tk, fd);
+     termkey_set_fd(tk, (termkey_fd_t)fd);
      return mrb_true_value();
 }
 #endif
