@@ -118,10 +118,10 @@ static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
-     mrb_int fd;
+     mrb_value fd;
 
-     mrb_get_args(mrb, "i", &fd);
-     termkey_set_fd(tk, (termkey_fd_t)fd);
+     mrb_get_args(mrb, "o", &fd);
+     termkey_set_fd(tk, (termkey_fd_t)mrb_cptr(fd));
      return mrb_true_value();
 }
 #endif
