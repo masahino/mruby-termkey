@@ -17,7 +17,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "w") do |f|
           f.write libtermkey_tar
         end
-        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
+        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
           if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
 #            sh %Q{cd #{libtermkey_build_root} && patch -p0 < #{dir}/libtermkey-0.18.patch}
             sh %Q{cd #{libtermkey_dir} && wget http://foicica.com/hg/textadept/raw-file/ecbc553cbbc7/src/termkey.patch && patch < termkey.patch}
