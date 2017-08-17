@@ -66,12 +66,42 @@ static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 
      key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
      ret = termkey_waitkey(tk, key);
+#if _WIN32
+  if (key->type == TERMKEY_TYPE_UNICODE) {
+    if (key->code.codepoint == 9) {
+      key->type = TERMKEY_TYPE_KEYSYM;
+      key->code.sym = 2;
+    } else if (key->code.codepoint == 13) {
+      key->type = TERMKEY_TYPE_KEYSYM;
+      key->code.sym = 3;
+    }
+  }
+#endif /* _WIN32 */
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
      DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
      DATA_PTR(key_obj) = key;
      mrb_ary_push(mrb, ret_ary, key_obj);
      return ret_ary;
 }
+
+static mrb_value mrb_termkey_getkey(mrb_state *mrb, mrb_value self)
+{
+     TermKey *tk = (TermKey *)DATA_PTR(self);
+     TermKeyResult ret;
+     TermKeyKey *key;
+     struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
+     mrb_value ret_ary = mrb_ary_new(mrb);
+     mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
+
+     key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
+     ret = termkey_getkey(tk, key);
+     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
+     DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
+     DATA_PTR(key_obj) = key;
+     mrb_ary_push(mrb, ret_ary, key_obj);
+     return ret_ary;
+}
+
 
 static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
 {
@@ -239,6 +269,7 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
      
     mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "getkey", mrb_termkey_getkey, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
     mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
     mrb_define_method(mrb, termkey, "stop", mrb_termkey_stop, MRB_ARGS_NONE());
