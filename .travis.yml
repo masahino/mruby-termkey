@@ -1,10 +1,10 @@
-sudo: false
-addons:
-  apt:
-    packages:
-      - gperf
+language: c
+compiler:
+  - gcc
+  - clang
+before_install:
+    - sudo apt-get -qq update
+install:
+    - sudo apt-get -qq install rake bison git gperf
 script:
-  - export MRUBY_CONFIG="$TRAVIS_BUILD_DIR/.travis_config.rb"
-  - git clone --depth 1 "https://github.com/mruby/mruby.git"
-  - cd mruby
-  - ./minirake all test
+  - rake test
