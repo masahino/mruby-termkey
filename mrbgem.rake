@@ -14,7 +14,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
       open(libtermkey_url, "r") do |http|
         libtermkey_tar = http.read
         FileUtils.mkdir_p libtermkey_build_root
-        IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "w") do |f|
+        IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "wb") do |f|
           f.write libtermkey_tar
         end
         if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
@@ -34,7 +34,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
 
         else
-          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" make libtermkey.la)}
+          sh %Q{(cd #{filename libtermkey_dir} && make CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" libtermkey.la)}
           sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
         end
       end
