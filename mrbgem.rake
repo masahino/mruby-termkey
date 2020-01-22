@@ -5,9 +5,9 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
 
   def spec.download_libtermkey
     require 'open-uri'
-    libtermkey_url = "http://www.leonerd.org.uk/code/libtermkey/libtermkey-0.18.tar.gz"
+    libtermkey_url = "http://www.leonerd.org.uk/code/libtermkey/libtermkey-0.22.tar.gz"
     libtermkey_build_root = "#{build_dir}/libtermkey/"
-    libtermkey_dir = "#{libtermkey_build_root}/libtermkey-0.18"
+    libtermkey_dir = "#{libtermkey_build_root}/libtermkey-0.22"
     libtermkey_a = "#{libtermkey_dir}/libtermkey.a"
 
     unless File.exists?(libtermkey_a)
@@ -19,7 +19,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         end
         if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
           if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
-#            sh %Q{cd #{libtermkey_build_root} && patch -p0 < #{dir}/libtermkey-0.18.patch}
+#            sh %Q{cd #{libtermkey_build_root} && patch -p1 < #{dir}/libtermkey-0.18.patch}
             sh %Q{cd #{libtermkey_dir} && wget http://foicica.com/hg/textadept/raw-file/ecbc553cbbc7/src/termkey.patch && patch < termkey.patch}
           end
           sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make termkey.o)}
@@ -45,5 +45,6 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
     [self.cc, self.cxx, self.objc, self.mruby.cc, self.mruby.cxx, self.mruby.objc].each do |cc|
       cc.include_paths << libtermkey_dir
     end
+    self.linker.libraries << 'ncurses'
   end
 end
