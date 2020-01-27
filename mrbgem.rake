@@ -3,6 +3,10 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
   spec.authors = 'masahino'
   spec.linker.libraries << 'termkey'
 
+  def self.run_command(env, command)
+    fail "#{command} failed" unless system(env, command)
+  end
+
   def spec.download_libtermkey
     require 'open-uri'
     libtermkey_url = "http://www.leonerd.org.uk/code/libtermkey/libtermkey-0.22.tar.gz"
@@ -17,6 +21,13 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "wb") do |f|
           f.write libtermkey_tar
         end
+        Dir.chdir(libtermkey_dir) do |t|
+        e = {
+          'CC'  => "#{build.cc.command} #{build.cc.flags.join(' ')}",
+          'CXX' => "#{build.cxx.command} #{build.cxx.flags.join(' ')}",
+          'LD'  => "#{build.linker.command} #{build.linker.flags.join(' ')}",
+          'AR'  => build.archiver.command
+        }
         if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
           if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
 #            sh %Q{cd #{libtermkey_build_root} && patch -p1 < #{dir}/libtermkey-0.18.patch}
@@ -34,9 +45,11 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
 
         else
-          sh %Q{(cd #{filename libtermkey_dir} && make CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" libtermkey.la)}
+          run_command e, 'make libtermkey.la'
+#          sh %Q{(cd #{filename libtermkey_dir} && make CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" libtermkey.la)}
           sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
         end
+end
       end
     end
 

@@ -45,11 +45,8 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
   if (argc < 2) {
     flags = 0;
   }
-#if !_WIN32
   tk = termkey_new(fd, flags);
-#else
-  tk = termkey_new((void *)fd, flags);
-#endif
+
   DATA_PTR(self) = tk;
 
   return self;
@@ -144,18 +141,6 @@ static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
      return mrb_true_value();
 }
 
-#if _WIN32
-static mrb_value mrb_termkey_set_fd(mrb_state *mrb, mrb_value self)
-{
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     mrb_value fd;
-
-     mrb_get_args(mrb, "o", &fd);
-     termkey_set_fd(tk, (termkey_fd_t)mrb_cptr(fd));
-     return mrb_true_value();
-}
-#endif
-
 static mrb_value mrb_termkey_get_buffer_size(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
@@ -213,6 +198,13 @@ static mrb_value mrb_termkey_destroy(mrb_state *mrb, mrb_value self)
     return self;
 }
 
+static mrb_value mrb_termkey_get_flags(mrb_state *mrb, mrb_value self)
+{
+    TermKey *tk = (TermKey *)DATA_PTR(self);
+
+    return mrb_fixnum_value(termkey_get_flags(tk));
+}
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
@@ -268,14 +260,13 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
      MRB_SET_INSTANCE_TT(termkeykey, MRB_TT_DATA);
      
     mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
+#ifndef _WIN32
     mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
+#endif
     mrb_define_method(mrb, termkey, "getkey", mrb_termkey_getkey, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
     mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
     mrb_define_method(mrb, termkey, "stop", mrb_termkey_stop, MRB_ARGS_NONE());
-#if _WIN32
-    mrb_define_method(mrb, termkey, "set_fd", mrb_termkey_set_fd, MRB_ARGS_REQ(1));
-#endif
     mrb_define_method(mrb, termkey, "buffer_size", mrb_termkey_get_buffer_size, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkey, "buffer_size=", mrb_termkey_set_buffer_size, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, termkey, "buffer_remaining", mrb_termkey_get_buffer_remaining, MRB_ARGS_NONE());
@@ -284,6 +275,8 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, termkey, "waittime", mrb_termkey_get_waittime, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, termkey, "destroy", mrb_termkey_destroy, MRB_ARGS_NONE());
+
+    mrb_define_method(mrb, termkey, "get_flags", mrb_termkey_get_flags, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
@@ -362,4 +355,3 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 void mrb_mruby_termkey_gem_final(mrb_state *mrb)
 {
 }
-
