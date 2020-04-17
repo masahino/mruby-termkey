@@ -52,6 +52,7 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
   return self;
 }
 
+#ifndef _WIN32
 static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
@@ -63,23 +64,14 @@ static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 
      key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
      ret = termkey_waitkey(tk, key);
-#if _WIN32
-  if (key->type == TERMKEY_TYPE_UNICODE) {
-    if (key->code.codepoint == 9) {
-      key->type = TERMKEY_TYPE_KEYSYM;
-      key->code.sym = 2;
-    } else if (key->code.codepoint == 13) {
-      key->type = TERMKEY_TYPE_KEYSYM;
-      key->code.sym = 3;
-    }
-  }
-#endif /* _WIN32 */
+
      mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
      DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
      DATA_PTR(key_obj) = key;
      mrb_ary_push(mrb, ret_ary, key_obj);
      return ret_ary;
 }
+#endif
 
 static mrb_value mrb_termkey_getkey(mrb_state *mrb, mrb_value self)
 {
@@ -144,9 +136,10 @@ static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_termkey_get_buffer_size(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret;
-
-     ret = termkey_get_buffer_size(tk);
+     size_t ret = 0;
+  if (tk != NULL) {
+    ret = termkey_get_buffer_size(tk);
+    }
      return mrb_fixnum_value(ret);
 }
 
@@ -156,26 +149,32 @@ static mrb_value mrb_termkey_set_buffer_size(mrb_state *mrb, mrb_value self)
      mrb_int size, ret;
 
      mrb_get_args(mrb, "i", &size);
-
+  ret = 0;
+  if (tk != NULL) {
      ret = termkey_set_buffer_size(tk, size);
+  }
      return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_get_buffer_remaining(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret;
+     size_t ret = 0;
 
+  if (tk != NULL) {
      ret = termkey_get_buffer_remaining(tk);
+}
      return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_get_waittime(mrb_state *mrb, mrb_value self)
 {
      TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret;
+     size_t ret = 0;
 
-     ret = termkey_get_waittime(tk);
+  if (tk != NULL) {
+    ret = termkey_get_waittime(tk);
+  }
      return mrb_fixnum_value(ret);
 }
 
@@ -186,7 +185,9 @@ static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
 
      mrb_get_args(mrb, "i", &waittime);
 
+  if (tk != NULL) {
      termkey_set_waittime(tk, waittime);
+  }
      return mrb_nil_value();
 }
 
