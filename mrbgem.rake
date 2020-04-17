@@ -15,13 +15,16 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
     libtermkey_a = "#{libtermkey_dir}/libtermkey.a"
 
     unless File.exists?(libtermkey_a)
-      open(libtermkey_url, "r") do |http|
-        libtermkey_tar = http.read
-        FileUtils.mkdir_p libtermkey_build_root
-        IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "wb") do |f|
-          f.write libtermkey_tar
+      unless File.exists?(libtermkey_dir)
+        open(libtermkey_url, "r") do |http|
+          libtermkey_tar = http.read
+          FileUtils.mkdir_p libtermkey_build_root
+          IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "wb") do |f|
+            f.write libtermkey_tar
+          end
         end
-        Dir.chdir(libtermkey_dir) do |t|
+      end
+      Dir.chdir(libtermkey_dir) do |t|
         e = {
           'CC'  => "#{build.cc.command} #{build.cc.flags.join(' ')}",
           'CXX' => "#{build.cxx.command} #{build.cxx.flags.join(' ')}",
@@ -43,21 +46,19 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
             sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
           end
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
-
         else
           run_command e, 'make libtermkey.la'
-#          sh %Q{(cd #{filename libtermkey_dir} && make CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" libtermkey.la)}
+          #          sh %Q{(cd #{filename libtermkey_dir} && make CC=#{build.cc.command} LDFLAGS="#{build.linker.all_flags.gsub('\\','\\\\').gsub('"', '\\"')}" libtermkey.la)}
           sh %Q{(cd #{filename libtermkey_dir} && cp .libs/libtermkey.a ./libtermkey.a)}
         end
-end
       end
     end
 
-    self.linker.flags_before_libraries << libtermkey_a
-    self.linker.libraries.delete 'termkey'
-    [self.cc, self.cxx, self.objc, self.mruby.cc, self.mruby.cxx, self.mruby.objc].each do |cc|
-      cc.include_paths << libtermkey_dir
-    end
-    self.linker.libraries << 'ncurses'
+  self.linker.flags_before_libraries << libtermkey_a
+  self.linker.libraries.delete 'termkey'
+  [self.cc, self.cxx, self.objc, self.mruby.cc, self.mruby.cxx, self.mruby.objc].each do |cc|
+    cc.include_paths << libtermkey_dir
   end
+  self.linker.libraries << 'ncurses'
+end
 end
