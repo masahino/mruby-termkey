@@ -206,6 +206,24 @@ static mrb_value mrb_termkey_get_flags(mrb_state *mrb, mrb_value self)
     return mrb_fixnum_value(termkey_get_flags(tk));
 }
 
+static mrb_value mrb_termkey_get_fd(mrb_state *mrb, mrb_value self)
+{
+    TermKey *tk = (TermKey *)DATA_PTR(self);
+
+    return mrb_fixnum_value(termkey_get_fd(tk));
+}
+
+static mrb_value mrb_termkey_push_bytes(mrb_state *mrb, mrb_value self)
+{
+    char *bytes;
+    mrb_int len;
+    TermKey *tk = (TermKey *)DATA_PTR(self);
+
+    mrb_get_args(mrb, "s", &bytes, &len);
+
+    return mrb_fixnum_value(termkey_push_bytes(tk, bytes, len));
+}
+
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
      TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
@@ -278,6 +296,8 @@ void mrb_mruby_termkey_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, termkey, "destroy", mrb_termkey_destroy, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, termkey, "get_flags", mrb_termkey_get_flags, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "get_fd", mrb_termkey_get_fd, MRB_ARGS_NONE());
+    mrb_define_method(mrb, termkey, "push_bytes", mrb_termkey_push_bytes, MRB_ARGS_REQ(1));
 
     mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
     mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
