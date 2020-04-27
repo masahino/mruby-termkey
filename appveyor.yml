@@ -11,7 +11,7 @@ environment:
     BASH: C:\msys64\usr\bin\bash
     CC: x86_64-w64-mingw32-gcc
     MSYS_PACKAGES: mingw-w64-x86_64-ruby mingw-w64-x86_64-unibilium
-    PATH: c:\msys64\mingw64\usr\bin;c:\msys64\mingw64\bin;%PATH%
+    PATH: c:\msys64\mingw64\usr\bin;c:\msys64\mingw64\bin
 install:
 - cmd: >-
     if defined CYG_ROOT (%CYG_SETUP% --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --packages "%CYG_PACKAGES%" --upgrade-also)
