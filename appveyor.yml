@@ -22,6 +22,6 @@ install:
 
     if defined MSYSTEM (%BASH% -lc "gem install -f rake")
 build_script:
-- cmd: if defined BASH (%BASH% -lc "cd $(cygpath ${APPVEYOR_BUILD_FOLDER}) && rake")
+- cmd: if defined BASH (%BASH% -lc "cd $(cygpath ${APPVEYOR_BUILD_FOLDER}) && unset PKG_CONFIG_PATH && rake")
 test_script:
 - cmd: if defined BASH (%BASH% -lc "cd $(cygpath ${APPVEYOR_BUILD_FOLDER}) && rake test")
