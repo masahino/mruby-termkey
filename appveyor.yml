@@ -19,6 +19,7 @@ install:
     if defined MSYSTEM (%BASH% -lc "pacman -Suuy --noconfirm ${MSYS_PACKAGES}")
 
     if defined MSYSTEM (%BASH% -lc "pacman -Suuy --noconfirm ${MSYS_PACKAGES} && pacman -Sc --noconfirm")
+    if defined MSYSTEM (%BASH% -lc "gem install -f rake")
 build_script:
 - cmd: if defined BASH (%BASH% -lc "cd $(cygpath ${APPVEYOR_BUILD_FOLDER}) && rake")
 test_script:
