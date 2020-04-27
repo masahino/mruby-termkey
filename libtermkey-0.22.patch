@@ -1,0 +1,14 @@
+diff -ru libtermkey-0.22-org/termkey.c libtermkey-0.22/termkey.c
+--- libtermkey-0.22-org/termkey.c	2019-03-14 22:47:10.000000000 +0900
++++ libtermkey-0.22/termkey.c	2020-04-25 20:58:40.000000000 +0900
+@@ -5,9 +5,9 @@
+ #include <errno.h>
+ #ifndef _WIN32
+ # include <poll.h>
+-# include <unistd.h>
+ # include <strings.h>
+ #endif
++#include <unistd.h>
+ #include <string.h>
+ 
+ #include <stdio.h>
