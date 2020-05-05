@@ -25,25 +25,23 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
         end
       end
       Dir.chdir(libtermkey_dir) do |t|
+        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-w64-mingw32).include?(build.host_target)
+          build.cc.flags << "-DHAVE_UNIBILIUM"
+        end
         e = {
           'CC'  => "#{build.cc.command} #{build.cc.flags.join(' ')}",
           'CXX' => "#{build.cxx.command} #{build.cxx.flags.join(' ')}",
           'LD'  => "#{build.linker.command} #{build.linker.flags.join(' ')}",
           'AR'  => build.archiver.command
         }
-        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 i386-apple-darwin14 x86_64-w64-mingw32 i686-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
-          if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
-            sh %Q{cd #{libtermkey_dir} && wget http://foicica.com/hg/textadept/raw-file/ecbc553cbbc7/src/termkey.patch && patch < termkey.patch}
-          end
-          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make termkey.o)}
-          if %w(x86_64-w64-mingw32 i686-w64-mingw32).include?(build.host_target)
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-win32-pdcurses.o)}
-            sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-win32-pdcurses.o)}
-          else
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-csi.o)}
-            sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-ti.o)}
-            sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
-          end
+        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 x86_64-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
+          run_command e, "make termkey.o"
+          run_command e, "make driver-csi.o"
+          run_command e, "make driver-ti.o"
+#          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} CFLAGS="-DHAVE_UNIBILIUM" make termkey.o)}
+#          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-csi.o)}
+#          sh %Q{(cd #{filename libtermkey_dir} && CC=#{build.cc.command} make driver-ti.o)}
+          sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
         else
           if RUBY_PLATFORM.downcase =~ /msys|mingw/
@@ -60,7 +58,8 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
     [self.cc, self.cxx, self.objc, self.mruby.cc, self.mruby.cxx, self.mruby.objc].each do |cc|
       cc.include_paths << libtermkey_dir
     end
-    if RUBY_PLATFORM.downcase =~ /msys|mingw/
+    if RUBY_PLATFORM.downcase =~ /msys|mingw/ or
+	(build.kind_of?(MRuby::CrossBuild) && %w(x86_64-w64-mingw32).include?(build.host_target))
       self.linker.libraries << 'unibilium'
     else
       self.linker.libraries << 'ncurses'
