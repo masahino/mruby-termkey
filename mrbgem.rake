@@ -34,6 +34,10 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           'LD'  => "#{build.linker.command} #{build.linker.flags.join(' ')}",
           'AR'  => build.archiver.command
         }
+        if RUBY_PLATFORM.downcase =~ /msys|mingw/ or
+          (build.kind_of?(MRuby::CrossBuild) && %w(x86_64-w64-mingw32).include?(build.host_target))
+            sh %Q{patch -N -p1 < #{dir}/libtermkey-0.22.patch}
+        end
         if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 x86_64-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
           run_command e, "make termkey.o"
           run_command e, "make driver-csi.o"
@@ -44,9 +48,6 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           sh %Q{(cd #{filename libtermkey_dir} && #{build.archiver.command} cru libtermkey.a termkey.o driver-csi.o driver-ti.o)}
           sh %Q{(cd #{filename libtermkey_dir} && #{build.host_target}-ranlib libtermkey.a)}
         else
-          if RUBY_PLATFORM.downcase =~ /msys|mingw/
-            sh %Q{patch -N -p1 < #{dir}/libtermkey-0.22.patch}
-          end
           run_command e, 'make libtermkey.la'
           sh %Q{cp .libs/libtermkey.a ./libtermkey.a}
         end
