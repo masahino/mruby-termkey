@@ -34,7 +34,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           'LD'  => "#{build.linker.command} #{build.linker.flags.join(' ')}",
           'AR'  => build.archiver.command
         }
-        if RUBY_PLATFORM.downcase =~ /msys|mingw/ &&
+        if RUBY_PLATFORM.downcase =~ /msys|mingw/ or
           (build.kind_of?(MRuby::CrossBuild) && %w(x86_64-w64-mingw32).include?(build.host_target))
             sh %Q{patch -N -p1 < #{dir}/libtermkey-0.22.patch}
         end
