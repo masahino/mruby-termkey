@@ -38,7 +38,8 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
           (build.kind_of?(MRuby::CrossBuild) && %w(x86_64-w64-mingw32).include?(build.host_target))
             sh %Q{patch -N -p1 < #{dir}/libtermkey-0.22.patch}
         end
-        if build.kind_of?(MRuby::CrossBuild) && %w(x86_64-apple-darwin14 x86_64-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
+        if build.kind_of?(MRuby::CrossBuild) &&
+          %w(x86_64-apple-darwin14 x86_64-apple-darwin19 x86_64-w64-mingw32 arm-linux-gnueabihf).include?(build.host_target)
           run_command e, "make termkey.o"
           run_command e, "make driver-csi.o"
           run_command e, "make driver-ti.o"
