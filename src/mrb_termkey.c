@@ -17,9 +17,9 @@
 #define DONE mrb_gc_arena_restore(mrb, 0);
 
 static void mrb_termkey_free(mrb_state *mrb, void *ptr) {
-     if (ptr != NULL) {
+  if (ptr != NULL) {
 	  termkey_destroy((TermKey *)ptr);
-     }
+  }
 }
 
 static const struct mrb_data_type mrb_termkey_data_type = {
@@ -55,322 +55,341 @@ static mrb_value mrb_termkey_init(mrb_state *mrb, mrb_value self)
 #ifndef _WIN32
 static mrb_value mrb_termkey_waitkey(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     TermKeyResult ret;
-     TermKeyKey *key;
-     struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
-     mrb_value ret_ary = mrb_ary_new(mrb);
-     mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKeyResult ret;
+  TermKeyKey *key;
+  struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
+  mrb_value ret_ary = mrb_ary_new(mrb);
+  mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
 
-     key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
-     ret = termkey_waitkey(tk, key);
+  key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
+  ret = termkey_waitkey(tk, key);
 
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
-     DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
-     DATA_PTR(key_obj) = key;
-     mrb_ary_push(mrb, ret_ary, key_obj);
-     return ret_ary;
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
+  DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
+  DATA_PTR(key_obj) = key;
+  mrb_ary_push(mrb, ret_ary, key_obj);
+  return ret_ary;
 }
 #endif
 
 static mrb_value mrb_termkey_getkey(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     TermKeyResult ret;
-     TermKeyKey *key;
-     struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
-     mrb_value ret_ary = mrb_ary_new(mrb);
-     mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKeyResult ret;
+  TermKeyKey *key;
+  struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
+  mrb_value ret_ary = mrb_ary_new(mrb);
+  mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
 
-     key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
-     ret = termkey_getkey(tk, key);
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
-     DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
-     DATA_PTR(key_obj) = key;
-     mrb_ary_push(mrb, ret_ary, key_obj);
-     return ret_ary;
+  key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
+  ret = termkey_getkey(tk, key);
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ret));
+  DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
+  DATA_PTR(key_obj) = key;
+  mrb_ary_push(mrb, ret_ary, key_obj);
+  return ret_ary;
 }
-
 
 static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     TermKeyKey *key;
-     char buff[64];
-     mrb_int format, ret;
-     mrb_value key_obj;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKeyKey *key;
+  char buff[64];
+  mrb_int format, ret;
+  mrb_value key_obj;
 
-     mrb_get_args(mrb, "oi", &key_obj, &format);
-     key = (TermKeyKey *)DATA_PTR(key_obj);
-     ret = termkey_strfkey(tk, buff, sizeof(buff), key, (TermKeyFormat)format);
-     return mrb_str_new_cstr(mrb, buff);
+  mrb_get_args(mrb, "oi", &key_obj, &format);
+  key = (TermKeyKey *)DATA_PTR(key_obj);
+  ret = termkey_strfkey(tk, buff, sizeof(buff), key, (TermKeyFormat)format);
+  return mrb_str_new_cstr(mrb, buff);
+}
+
+static mrb_value mrb_termkey_strpkey(mrb_state *mrb, mrb_value self)
+{
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKeyKey *key;
+  const char *ret;
+  mrb_int len;
+  char *str;
+  struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
+  mrb_int format;
+  mrb_value key_obj = mrb_obj_value(Data_Wrap_Struct(mrb, termkeykey, &mrb_termkeykey_data_type, NULL));
+
+  mrb_get_args(mrb, "si", &str, &len, &format);
+  key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
+  ret = termkey_strpkey(tk, str, key, (TermKeyFormat)format);
+  DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
+  DATA_PTR(key_obj) = key;
+  return key_obj;
 }
 
 static mrb_value mrb_termkey_interpret_mouse(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     TermKeyKey *key;
-     TermKeyMouseEvent ev;
-     int button, line, col;
-     mrb_value key_obj;
-     mrb_value ret_ary = mrb_ary_new(mrb);
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKeyKey *key;
+  TermKeyMouseEvent ev;
+  int button, line, col;
+  mrb_value key_obj;
+  mrb_value ret_ary = mrb_ary_new(mrb);
 
-     mrb_get_args(mrb, "o", &key_obj);
-     key = (TermKeyKey *)DATA_PTR(key_obj);
-     termkey_interpret_mouse(tk, key, &ev, &button, &line, &col);
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ev));
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(button));
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(line));
-     mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(col));
-     return ret_ary;
+  mrb_get_args(mrb, "o", &key_obj);
+  key = (TermKeyKey *)DATA_PTR(key_obj);
+  termkey_interpret_mouse(tk, key, &ev, &button, &line, &col);
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(ev));
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(button));
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(line));
+  mrb_ary_push(mrb, ret_ary, mrb_fixnum_value(col));
+  return ret_ary;
 }
 
 static mrb_value mrb_termkey_stop(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKey *tk = (TermKey *)DATA_PTR(self);
 
-     termkey_stop(tk);
-     return mrb_true_value();
+  termkey_stop(tk);
+  return mrb_true_value();
 }
 
 static mrb_value mrb_termkey_get_buffer_size(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret = 0;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  size_t ret = 0;
   if (tk != NULL) {
     ret = termkey_get_buffer_size(tk);
-    }
-     return mrb_fixnum_value(ret);
+  }
+  return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_set_buffer_size(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     mrb_int size, ret;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  mrb_int size, ret;
 
-     mrb_get_args(mrb, "i", &size);
+  mrb_get_args(mrb, "i", &size);
   ret = 0;
   if (tk != NULL) {
      ret = termkey_set_buffer_size(tk, size);
   }
-     return mrb_fixnum_value(ret);
+  return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_get_buffer_remaining(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret = 0;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  size_t ret = 0;
 
   if (tk != NULL) {
      ret = termkey_get_buffer_remaining(tk);
-}
-     return mrb_fixnum_value(ret);
+  }
+  return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_get_waittime(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     size_t ret = 0;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  size_t ret = 0;
 
   if (tk != NULL) {
     ret = termkey_get_waittime(tk);
   }
-     return mrb_fixnum_value(ret);
+  return mrb_fixnum_value(ret);
 }
 
 static mrb_value mrb_termkey_set_waittime(mrb_state *mrb, mrb_value self)
 {
-     TermKey *tk = (TermKey *)DATA_PTR(self);
-     mrb_int waittime;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  mrb_int waittime;
 
-     mrb_get_args(mrb, "i", &waittime);
+  mrb_get_args(mrb, "i", &waittime);
 
   if (tk != NULL) {
      termkey_set_waittime(tk, waittime);
   }
-     return mrb_nil_value();
+  return mrb_nil_value();
 }
 
 static mrb_value mrb_termkey_destroy(mrb_state *mrb, mrb_value self)
 {
-    TermKey *tk = (TermKey *)DATA_PTR(self);
-    termkey_destroy(tk);
-    DATA_PTR(self) = NULL;
-    return self;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
+  termkey_destroy(tk);
+  DATA_PTR(self) = NULL;
+  return self;
 }
 
 static mrb_value mrb_termkey_get_flags(mrb_state *mrb, mrb_value self)
 {
-    TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKey *tk = (TermKey *)DATA_PTR(self);
 
-    return mrb_fixnum_value(termkey_get_flags(tk));
+  return mrb_fixnum_value(termkey_get_flags(tk));
 }
 
 static mrb_value mrb_termkey_get_fd(mrb_state *mrb, mrb_value self)
 {
-    TermKey *tk = (TermKey *)DATA_PTR(self);
+  TermKey *tk = (TermKey *)DATA_PTR(self);
 
-    return mrb_fixnum_value(termkey_get_fd(tk));
+  return mrb_fixnum_value(termkey_get_fd(tk));
 }
 
 static mrb_value mrb_termkey_push_bytes(mrb_state *mrb, mrb_value self)
 {
-    char *bytes;
-    mrb_int len;
-    TermKey *tk = (TermKey *)DATA_PTR(self);
+  char *bytes;
+  mrb_int len;
+  TermKey *tk = (TermKey *)DATA_PTR(self);
 
-    mrb_get_args(mrb, "s", &bytes, &len);
+  mrb_get_args(mrb, "s", &bytes, &len);
 
-    return mrb_fixnum_value(termkey_push_bytes(tk, bytes, len));
+  return mrb_fixnum_value(termkey_push_bytes(tk, bytes, len));
 }
 
 static mrb_value mrb_termkeykey_type(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
-     return mrb_fixnum_value(tk->type);
+  TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
+  return mrb_fixnum_value(tk->type);
 }
 
 static mrb_value mrb_termkeykey_modifiers(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
-     return mrb_fixnum_value(tk->modifiers);
+  TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
+  return mrb_fixnum_value(tk->modifiers);
 }
 
 static mrb_value mrb_termkeykey_code(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
-     mrb_value code;
+  TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
+  mrb_value code;
 
-     switch(tk->type) {
-     case TERMKEY_TYPE_UNICODE:
+  switch(tk->type) {
+    case TERMKEY_TYPE_UNICODE:
 	  code = mrb_fixnum_value(tk->code.codepoint);
 	  break;
-     case TERMKEY_TYPE_FUNCTION:
+    case TERMKEY_TYPE_FUNCTION:
 	  code = mrb_fixnum_value(tk->code.number);
 	  break;
-     case TERMKEY_TYPE_KEYSYM:
+    case TERMKEY_TYPE_KEYSYM:
 	  code = mrb_fixnum_value(tk->code.sym);
 	  break;
-     case  TERMKEY_TYPE_MOUSE:
+    case  TERMKEY_TYPE_MOUSE:
 	  code = mrb_str_new(mrb, tk->code.mouse, 4);
 	  break;
-     case TERMKEY_TYPE_POSITION:
-     case TERMKEY_TYPE_MODEREPORT:
-     case TERMKEY_TYPE_UNKNOWN_CSI:
-     default:
+    case TERMKEY_TYPE_POSITION:
+    case TERMKEY_TYPE_MODEREPORT:
+    case TERMKEY_TYPE_UNKNOWN_CSI:
+    default:
 	  code = mrb_nil_value();
-     }
-     return code;
+  }
+  return code;
 }
 
 static mrb_value mrb_termkeykey_utf8(mrb_state *mrb, mrb_value self)
 {
-     TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
-     return mrb_str_new_cstr(mrb, tk->utf8);
+  TermKeyKey *tk = (TermKeyKey *)DATA_PTR(self);
+  return mrb_str_new_cstr(mrb, tk->utf8);
 }
 
 
 void mrb_mruby_termkey_gem_init(mrb_state *mrb)
 {
-     struct RClass *termkey, *termkeykey;
-     termkey = mrb_define_class(mrb, "TermKey", mrb->object_class);
-     MRB_SET_INSTANCE_TT(termkey, MRB_TT_DATA);
-     termkeykey = mrb_define_class_under(mrb, termkey, "Key", mrb->object_class);
-     MRB_SET_INSTANCE_TT(termkeykey, MRB_TT_DATA);
+  struct RClass *termkey, *termkeykey;
+  termkey = mrb_define_class(mrb, "TermKey", mrb->object_class);
+  MRB_SET_INSTANCE_TT(termkey, MRB_TT_DATA);
+  termkeykey = mrb_define_class_under(mrb, termkey, "Key", mrb->object_class);
+  MRB_SET_INSTANCE_TT(termkeykey, MRB_TT_DATA);
      
-    mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
+  mrb_define_method(mrb, termkey, "initialize", mrb_termkey_init, MRB_ARGS_OPT(2));
 #ifndef _WIN32
-    mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "waitkey", mrb_termkey_waitkey, MRB_ARGS_NONE());
 #endif
-    mrb_define_method(mrb, termkey, "getkey", mrb_termkey_getkey, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
-    mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
-    mrb_define_method(mrb, termkey, "stop", mrb_termkey_stop, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "buffer_size", mrb_termkey_get_buffer_size, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "buffer_size=", mrb_termkey_set_buffer_size, MRB_ARGS_REQ(1));
-    mrb_define_method(mrb, termkey, "buffer_remaining", mrb_termkey_get_buffer_remaining, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "getkey", mrb_termkey_getkey, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "strfkey", mrb_termkey_strfkey, MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, termkey, "strpkey", mrb_termkey_strpkey, MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, termkey, "interpret_mouse", mrb_termkey_interpret_mouse, MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, termkey, "stop", mrb_termkey_stop, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "buffer_size", mrb_termkey_get_buffer_size, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "buffer_size=", mrb_termkey_set_buffer_size, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, termkey, "buffer_remaining", mrb_termkey_get_buffer_remaining, MRB_ARGS_NONE());
   
-    mrb_define_method(mrb, termkey, "waittime=", mrb_termkey_set_waittime, MRB_ARGS_REQ(1));
-    mrb_define_method(mrb, termkey, "waittime", mrb_termkey_get_waittime, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "waittime=", mrb_termkey_set_waittime, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, termkey, "waittime", mrb_termkey_get_waittime, MRB_ARGS_NONE());
 
-    mrb_define_method(mrb, termkey, "destroy", mrb_termkey_destroy, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "destroy", mrb_termkey_destroy, MRB_ARGS_NONE());
 
-    mrb_define_method(mrb, termkey, "get_flags", mrb_termkey_get_flags, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "get_fd", mrb_termkey_get_fd, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkey, "push_bytes", mrb_termkey_push_bytes, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, termkey, "get_flags", mrb_termkey_get_flags, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "get_fd", mrb_termkey_get_fd, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkey, "push_bytes", mrb_termkey_push_bytes, MRB_ARGS_REQ(1));
 
-    mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkeykey, "code", mrb_termkeykey_code, MRB_ARGS_NONE());
-    mrb_define_method(mrb, termkeykey, "utf8", mrb_termkeykey_utf8, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkeykey, "type", mrb_termkeykey_type, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkeykey, "modifiers", mrb_termkeykey_modifiers, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkeykey, "code", mrb_termkeykey_code, MRB_ARGS_NONE());
+  mrb_define_method(mrb, termkeykey, "utf8", mrb_termkeykey_utf8, MRB_ARGS_NONE());
 
-    mrb_define_const(mrb, termkey, "TYPE_UNICODE", mrb_fixnum_value(TERMKEY_TYPE_UNICODE));
-    mrb_define_const(mrb, termkey, "TYPE_FUNCTION", mrb_fixnum_value(TERMKEY_TYPE_FUNCTION));
-    mrb_define_const(mrb, termkey, "TYPE_KEYSYM", mrb_fixnum_value(TERMKEY_TYPE_KEYSYM));
-    mrb_define_const(mrb, termkey, "TYPE_MOUSE", mrb_fixnum_value(TERMKEY_TYPE_MOUSE));
-    mrb_define_const(mrb, termkey, "TYPE_POSITION", mrb_fixnum_value(TERMKEY_TYPE_POSITION));
-    mrb_define_const(mrb, termkey, "TYPE_MODEREPORT", mrb_fixnum_value(TERMKEY_TYPE_MODEREPORT));
-    mrb_define_const(mrb, termkey, "TYPE_UNKNOWN_CSI", mrb_fixnum_value(TERMKEY_TYPE_UNKNOWN_CSI));
-    mrb_define_const(mrb, termkey, "RES_NONE", mrb_fixnum_value(TERMKEY_RES_NONE));
-    mrb_define_const(mrb, termkey, "RES_KEY", mrb_fixnum_value(TERMKEY_RES_KEY));
-    mrb_define_const(mrb, termkey, "RES_EOF", mrb_fixnum_value(TERMKEY_RES_EOF));
-    mrb_define_const(mrb, termkey, "RES_AGAIN", mrb_fixnum_value(TERMKEY_RES_AGAIN));
-    mrb_define_const(mrb, termkey, "RES_ERROR", mrb_fixnum_value(TERMKEY_RES_ERROR));
+  mrb_define_const(mrb, termkey, "TYPE_UNICODE", mrb_fixnum_value(TERMKEY_TYPE_UNICODE));
+  mrb_define_const(mrb, termkey, "TYPE_FUNCTION", mrb_fixnum_value(TERMKEY_TYPE_FUNCTION));
+  mrb_define_const(mrb, termkey, "TYPE_KEYSYM", mrb_fixnum_value(TERMKEY_TYPE_KEYSYM));
+  mrb_define_const(mrb, termkey, "TYPE_MOUSE", mrb_fixnum_value(TERMKEY_TYPE_MOUSE));
+  mrb_define_const(mrb, termkey, "TYPE_POSITION", mrb_fixnum_value(TERMKEY_TYPE_POSITION));
+  mrb_define_const(mrb, termkey, "TYPE_MODEREPORT", mrb_fixnum_value(TERMKEY_TYPE_MODEREPORT));
+  mrb_define_const(mrb, termkey, "TYPE_UNKNOWN_CSI", mrb_fixnum_value(TERMKEY_TYPE_UNKNOWN_CSI));
+  mrb_define_const(mrb, termkey, "RES_NONE", mrb_fixnum_value(TERMKEY_RES_NONE));
+  mrb_define_const(mrb, termkey, "RES_KEY", mrb_fixnum_value(TERMKEY_RES_KEY));
+  mrb_define_const(mrb, termkey, "RES_EOF", mrb_fixnum_value(TERMKEY_RES_EOF));
+  mrb_define_const(mrb, termkey, "RES_AGAIN", mrb_fixnum_value(TERMKEY_RES_AGAIN));
+  mrb_define_const(mrb, termkey, "RES_ERROR", mrb_fixnum_value(TERMKEY_RES_ERROR));
 
-    mrb_define_const(mrb, termkey, "KEYMOD_SHIFT", mrb_fixnum_value(TERMKEY_KEYMOD_SHIFT));
-    mrb_define_const(mrb, termkey, "KEYMOD_ALT", mrb_fixnum_value(TERMKEY_KEYMOD_ALT));
-    mrb_define_const(mrb, termkey, "KEYMOD_CTRL", mrb_fixnum_value(TERMKEY_KEYMOD_CTRL));
+  mrb_define_const(mrb, termkey, "KEYMOD_SHIFT", mrb_fixnum_value(TERMKEY_KEYMOD_SHIFT));
+  mrb_define_const(mrb, termkey, "KEYMOD_ALT", mrb_fixnum_value(TERMKEY_KEYMOD_ALT));
+  mrb_define_const(mrb, termkey, "KEYMOD_CTRL", mrb_fixnum_value(TERMKEY_KEYMOD_CTRL));
 
-    /* TermKeySym */
-    mrb_define_const(mrb, termkey, "SYM_UNKNOWN", mrb_fixnum_value(TERMKEY_SYM_UNKNOWN));
-    mrb_define_const(mrb, termkey, "SYM_NONE", mrb_fixnum_value(TERMKEY_SYM_NONE));
-    /* Special names in C0 */
-    mrb_define_const(mrb, termkey, "SYM_BACKSPACE", mrb_fixnum_value(TERMKEY_SYM_BACKSPACE));
-    mrb_define_const(mrb, termkey, "SYM_TAB", mrb_fixnum_value(TERMKEY_SYM_TAB));
-    mrb_define_const(mrb, termkey, "SYM_ENTER", mrb_fixnum_value(TERMKEY_SYM_ENTER));
-    mrb_define_const(mrb, termkey, "SYM_ESCAPE", mrb_fixnum_value(TERMKEY_SYM_ESCAPE));
-    /* Special names in G0 */
-    mrb_define_const(mrb, termkey, "SYM_SPACE", mrb_fixnum_value(TERMKEY_SYM_SPACE));
-    mrb_define_const(mrb, termkey, "SYM_DEL", mrb_fixnum_value(TERMKEY_SYM_DEL));
-    /* Special keys */
-    mrb_define_const(mrb, termkey, "SYM_UP", mrb_fixnum_value(TERMKEY_SYM_UP));
-    mrb_define_const(mrb, termkey, "SYM_DOWN", mrb_fixnum_value(TERMKEY_SYM_DOWN));
-    mrb_define_const(mrb, termkey, "SYM_LEFT", mrb_fixnum_value(TERMKEY_SYM_LEFT));
-    mrb_define_const(mrb, termkey, "SYM_RIGHT", mrb_fixnum_value(TERMKEY_SYM_RIGHT));
-    mrb_define_const(mrb, termkey, "SYM_BEGIN", mrb_fixnum_value(TERMKEY_SYM_BEGIN));
-    mrb_define_const(mrb, termkey, "SYM_FIND", mrb_fixnum_value(TERMKEY_SYM_FIND));
-    mrb_define_const(mrb, termkey, "SYM_INSERT", mrb_fixnum_value(TERMKEY_SYM_INSERT));
-    mrb_define_const(mrb, termkey, "SYM_DELETE", mrb_fixnum_value(TERMKEY_SYM_DELETE));
-    mrb_define_const(mrb, termkey, "SYM_SELECT", mrb_fixnum_value(TERMKEY_SYM_SELECT));
-    mrb_define_const(mrb, termkey, "SYM_PAGEUP", mrb_fixnum_value(TERMKEY_SYM_PAGEUP));
-    mrb_define_const(mrb, termkey, "SYM_PAGEDOWN", mrb_fixnum_value(TERMKEY_SYM_PAGEDOWN));
-    mrb_define_const(mrb, termkey, "SYM_HOME", mrb_fixnum_value(TERMKEY_SYM_HOME));
-    mrb_define_const(mrb, termkey, "SYM_END", mrb_fixnum_value(TERMKEY_SYM_END));
+  /* TermKeySym */
+  mrb_define_const(mrb, termkey, "SYM_UNKNOWN", mrb_fixnum_value(TERMKEY_SYM_UNKNOWN));
+  mrb_define_const(mrb, termkey, "SYM_NONE", mrb_fixnum_value(TERMKEY_SYM_NONE));
+  /* Special names in C0 */
+  mrb_define_const(mrb, termkey, "SYM_BACKSPACE", mrb_fixnum_value(TERMKEY_SYM_BACKSPACE));
+  mrb_define_const(mrb, termkey, "SYM_TAB", mrb_fixnum_value(TERMKEY_SYM_TAB));
+  mrb_define_const(mrb, termkey, "SYM_ENTER", mrb_fixnum_value(TERMKEY_SYM_ENTER));
+  mrb_define_const(mrb, termkey, "SYM_ESCAPE", mrb_fixnum_value(TERMKEY_SYM_ESCAPE));
+  /* Special names in G0 */
+  mrb_define_const(mrb, termkey, "SYM_SPACE", mrb_fixnum_value(TERMKEY_SYM_SPACE));
+  mrb_define_const(mrb, termkey, "SYM_DEL", mrb_fixnum_value(TERMKEY_SYM_DEL));
+  /* Special keys */
+  mrb_define_const(mrb, termkey, "SYM_UP", mrb_fixnum_value(TERMKEY_SYM_UP));
+  mrb_define_const(mrb, termkey, "SYM_DOWN", mrb_fixnum_value(TERMKEY_SYM_DOWN));
+  mrb_define_const(mrb, termkey, "SYM_LEFT", mrb_fixnum_value(TERMKEY_SYM_LEFT));
+  mrb_define_const(mrb, termkey, "SYM_RIGHT", mrb_fixnum_value(TERMKEY_SYM_RIGHT));
+  mrb_define_const(mrb, termkey, "SYM_BEGIN", mrb_fixnum_value(TERMKEY_SYM_BEGIN));
+  mrb_define_const(mrb, termkey, "SYM_FIND", mrb_fixnum_value(TERMKEY_SYM_FIND));
+  mrb_define_const(mrb, termkey, "SYM_INSERT", mrb_fixnum_value(TERMKEY_SYM_INSERT));
+  mrb_define_const(mrb, termkey, "SYM_DELETE", mrb_fixnum_value(TERMKEY_SYM_DELETE));
+  mrb_define_const(mrb, termkey, "SYM_SELECT", mrb_fixnum_value(TERMKEY_SYM_SELECT));
+  mrb_define_const(mrb, termkey, "SYM_PAGEUP", mrb_fixnum_value(TERMKEY_SYM_PAGEUP));
+  mrb_define_const(mrb, termkey, "SYM_PAGEDOWN", mrb_fixnum_value(TERMKEY_SYM_PAGEDOWN));
+  mrb_define_const(mrb, termkey, "SYM_HOME", mrb_fixnum_value(TERMKEY_SYM_HOME));
+  mrb_define_const(mrb, termkey, "SYM_END", mrb_fixnum_value(TERMKEY_SYM_END));
 
-    mrb_define_const(mrb, termkey, "FORMAT_LONGMOD", mrb_fixnum_value(TERMKEY_FORMAT_LONGMOD));
-    mrb_define_const(mrb, termkey, "FORMAT_CARETCTRL",  mrb_fixnum_value(TERMKEY_FORMAT_CARETCTRL));
-    mrb_define_const(mrb, termkey, "FORMAT_ALTISMETA",  mrb_fixnum_value(TERMKEY_FORMAT_ALTISMETA));
-    mrb_define_const(mrb, termkey, "FORMAT_WRAPBRACKET",  mrb_fixnum_value(TERMKEY_FORMAT_WRAPBRACKET));
-    mrb_define_const(mrb, termkey, "FORMAT_SPACEMOD",  mrb_fixnum_value(TERMKEY_FORMAT_SPACEMOD));
-    mrb_define_const(mrb, termkey, "FORMAT_LOWERMOD",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERMOD));
-    mrb_define_const(mrb, termkey, "FORMAT_LOWERSPACE",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERSPACE));
-    mrb_define_const(mrb, termkey, "FORMAT_MOUSE_POS",  mrb_fixnum_value(TERMKEY_FORMAT_MOUSE_POS));
-    mrb_define_const(mrb, termkey, "FORMAT_VIM",  mrb_fixnum_value(TERMKEY_FORMAT_VIM));
-    mrb_define_const(mrb, termkey, "FORMAT_URWID",  mrb_fixnum_value(TERMKEY_FORMAT_URWID));
+  mrb_define_const(mrb, termkey, "FORMAT_LONGMOD", mrb_fixnum_value(TERMKEY_FORMAT_LONGMOD));
+  mrb_define_const(mrb, termkey, "FORMAT_CARETCTRL",  mrb_fixnum_value(TERMKEY_FORMAT_CARETCTRL));
+  mrb_define_const(mrb, termkey, "FORMAT_ALTISMETA",  mrb_fixnum_value(TERMKEY_FORMAT_ALTISMETA));
+  mrb_define_const(mrb, termkey, "FORMAT_WRAPBRACKET",  mrb_fixnum_value(TERMKEY_FORMAT_WRAPBRACKET));
+  mrb_define_const(mrb, termkey, "FORMAT_SPACEMOD",  mrb_fixnum_value(TERMKEY_FORMAT_SPACEMOD));
+  mrb_define_const(mrb, termkey, "FORMAT_LOWERMOD",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERMOD));
+  mrb_define_const(mrb, termkey, "FORMAT_LOWERSPACE",  mrb_fixnum_value(TERMKEY_FORMAT_LOWERSPACE));
+  mrb_define_const(mrb, termkey, "FORMAT_MOUSE_POS",  mrb_fixnum_value(TERMKEY_FORMAT_MOUSE_POS));
+  mrb_define_const(mrb, termkey, "FORMAT_VIM",  mrb_fixnum_value(TERMKEY_FORMAT_VIM));
+  mrb_define_const(mrb, termkey, "FORMAT_URWID",  mrb_fixnum_value(TERMKEY_FORMAT_URWID));
 
-    mrb_define_const(mrb, termkey, "FLAG_NOINTERPRET", mrb_fixnum_value(TERMKEY_FLAG_NOINTERPRET));
-    mrb_define_const(mrb, termkey, "FLAG_CONVERTKP", mrb_fixnum_value(TERMKEY_FLAG_CONVERTKP));
-    mrb_define_const(mrb, termkey, "FLAG_RAW", mrb_fixnum_value(TERMKEY_FLAG_RAW));
-    mrb_define_const(mrb, termkey, "FLAG_UTF8", mrb_fixnum_value(TERMKEY_FLAG_UTF8));
-    mrb_define_const(mrb, termkey, "FLAG_NOTERMIOS", mrb_fixnum_value(TERMKEY_FLAG_NOTERMIOS));
-    mrb_define_const(mrb, termkey, "FLAG_SPACESYMBOL", mrb_fixnum_value(TERMKEY_FLAG_SPACESYMBOL));
-    mrb_define_const(mrb, termkey, "FLAG_CTRLC", mrb_fixnum_value(TERMKEY_FLAG_CTRLC));
-    mrb_define_const(mrb, termkey, "FLAG_EINTR", mrb_fixnum_value(TERMKEY_FLAG_EINTR));
+  mrb_define_const(mrb, termkey, "FLAG_NOINTERPRET", mrb_fixnum_value(TERMKEY_FLAG_NOINTERPRET));
+  mrb_define_const(mrb, termkey, "FLAG_CONVERTKP", mrb_fixnum_value(TERMKEY_FLAG_CONVERTKP));
+  mrb_define_const(mrb, termkey, "FLAG_RAW", mrb_fixnum_value(TERMKEY_FLAG_RAW));
+  mrb_define_const(mrb, termkey, "FLAG_UTF8", mrb_fixnum_value(TERMKEY_FLAG_UTF8));
+  mrb_define_const(mrb, termkey, "FLAG_NOTERMIOS", mrb_fixnum_value(TERMKEY_FLAG_NOTERMIOS));
+  mrb_define_const(mrb, termkey, "FLAG_SPACESYMBOL", mrb_fixnum_value(TERMKEY_FLAG_SPACESYMBOL));
+  mrb_define_const(mrb, termkey, "FLAG_CTRLC", mrb_fixnum_value(TERMKEY_FLAG_CTRLC));
+  mrb_define_const(mrb, termkey, "FLAG_EINTR", mrb_fixnum_value(TERMKEY_FLAG_EINTR));
 
-    mrb_define_const(mrb, termkey, "MOUSE_UNKNOWN", mrb_fixnum_value(TERMKEY_MOUSE_UNKNOWN));
-    mrb_define_const(mrb, termkey, "MOUSE_PRESS", mrb_fixnum_value(TERMKEY_MOUSE_PRESS));
-    mrb_define_const(mrb, termkey, "MOUSE_DRAG", mrb_fixnum_value(TERMKEY_MOUSE_DRAG));
-    mrb_define_const(mrb, termkey, "MOUSE_RELEASE", mrb_fixnum_value(TERMKEY_MOUSE_RELEASE));
+  mrb_define_const(mrb, termkey, "MOUSE_UNKNOWN", mrb_fixnum_value(TERMKEY_MOUSE_UNKNOWN));
+  mrb_define_const(mrb, termkey, "MOUSE_PRESS", mrb_fixnum_value(TERMKEY_MOUSE_PRESS));
+  mrb_define_const(mrb, termkey, "MOUSE_DRAG", mrb_fixnum_value(TERMKEY_MOUSE_DRAG));
+  mrb_define_const(mrb, termkey, "MOUSE_RELEASE", mrb_fixnum_value(TERMKEY_MOUSE_RELEASE));
 }
 
 void mrb_mruby_termkey_gem_final(mrb_state *mrb)
