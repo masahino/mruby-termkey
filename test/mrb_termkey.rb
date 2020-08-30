@@ -39,7 +39,7 @@ end
 
 assert("TermKey.strpkey") do
   t = TermKey.new
-#  key = t.strpkey("Up", 0)
-#  assert_equal(TermKey::TYPE_KEYSYM, key.type)
-#  assert_equal(TermKey::SYM_UP, key.code)
+  key = t.strpkey("Up", 0)
+  assert_equal(TermKey::TYPE_KEYSYM, key.type)
+  assert_equal(TermKey::SYM_UP, key.code)
 end
