@@ -16,7 +16,7 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
 
     unless File.exists?(libtermkey_a)
       unless File.exists?(libtermkey_dir)
-        open(libtermkey_url, "r") do |http|
+        URI.open(libtermkey_url) do |http|
           libtermkey_tar = http.read
           FileUtils.mkdir_p libtermkey_build_root
           IO.popen("tar xfz - -C #{filename libtermkey_build_root}", "wb") do |f|
