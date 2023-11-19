@@ -1,7 +1,6 @@
 MRuby::Gem::Specification.new('mruby-termkey') do |spec|
   spec.license = 'MIT'
   spec.authors = 'masahino'
-  spec.linker.libraries << 'termkey'
 
   def self.run_command(env, command)
     fail "#{command} failed" unless system(env, command)
@@ -74,5 +73,11 @@ MRuby::Gem::Specification.new('mruby-termkey') do |spec|
     end
 
     file "#{dir}/src/mrb_termkey.c" => [:mrb_termkey_with_compile_option, libtermkey_a]
+  end
+
+  if spec.build.cc.search_header_path('termkey.h')
+    spec.linker.libraries << 'termkey'
+  else
+    spec.download_libtermkey
   end
 end
