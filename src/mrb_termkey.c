@@ -96,12 +96,12 @@ static mrb_value mrb_termkey_strfkey(mrb_state *mrb, mrb_value self)
   TermKey *tk = (TermKey *)DATA_PTR(self);
   TermKeyKey *key;
   char buff[64];
-  mrb_int format, ret;
+  mrb_int format;
   mrb_value key_obj;
 
   mrb_get_args(mrb, "oi", &key_obj, &format);
   key = (TermKeyKey *)DATA_PTR(key_obj);
-  ret = termkey_strfkey(tk, buff, sizeof(buff), key, (TermKeyFormat)format);
+  termkey_strfkey(tk, buff, sizeof(buff), key, (TermKeyFormat)format);
   return mrb_str_new_cstr(mrb, buff);
 }
 
@@ -109,7 +109,6 @@ static mrb_value mrb_termkey_strpkey(mrb_state *mrb, mrb_value self)
 {
   TermKey *tk = (TermKey *)DATA_PTR(self);
   TermKeyKey *key;
-  const char *ret;
   mrb_int len;
   char *str;
   struct RClass *termkeykey = mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Key");
@@ -118,7 +117,7 @@ static mrb_value mrb_termkey_strpkey(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "si", &str, &len, &format);
   key = (TermKeyKey *)mrb_malloc(mrb, sizeof(TermKeyKey));
-  ret = termkey_strpkey(tk, str, key, (TermKeyFormat)format);
+  termkey_strpkey(tk, str, key, (TermKeyFormat)format);
   DATA_TYPE(key_obj) = &mrb_termkeykey_data_type;
   DATA_PTR(key_obj) = key;
   return key_obj;
