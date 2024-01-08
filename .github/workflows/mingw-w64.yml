@@ -21,12 +21,16 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-2019
+    runs-on: windows-latest
+
+    # env
+    env:
+      TERM: xterm
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: mingw setup
       uses: msys2/setup-msys2@v2
@@ -34,17 +38,11 @@ jobs:
         msystem: MINGW64
         install: mingw-w64-x86_64-gcc mingw-w64-x86_64-ruby mingw-w64-x86_64-unibilium mingw-w64-x86_64-libtool mingw-w64-x86_64-pkg-config git make patch bison
         update: true
-
-    - name: set env
-      run: echo "::set-env name=TERM::xterm"
-      
     # Runs a single command using the runners shell
     - name: build
       shell: msys2 {0}
       run: PKG_CONFIG_PATH="" rake
-
     # Runs a set of commands using the runners shell
     - name: test
       shell: msys2 {0}
       run: PKG_CONFIG_PATH="" rake test
-        
